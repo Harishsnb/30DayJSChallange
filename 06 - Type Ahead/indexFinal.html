@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+<script>
+const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+const citiesArray = [];
+
+//const prom = fetch(endpoint);
+//console.log(prom); // returns a promise 
+
+//fetch(endpoint).then(blob => console.log(blob)); // the data can be a html,music,image etc,. 
+//fetch(endpoint).then(blob => console.log(json.parse(blob))); // throws reference error because it returns a promise which cannot be parsed. Therefore the raw data should be converted to JSON using json() method which returns another promise 
+
+fetch(endpoint).then(blob => blob.json()).then(data => citiesArray.push(...data)); //using spread operator to split the array of objects into individual arary elements. 
+
+function findUserSearch(inputWord,citiesArr){
+  return citiesArr.filter(place => {
+    //here we need to find the match for the userquery 
+    const searchregx = new RegExp(inputWord, 'gi') // matched the word globally and case insensitive
+    return place.city.match(searchregx) || place.state.match(searchregx) // to match both in city and state
+
+  });
+}
+ 
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); // changes the number format
+}
+
+function displayUserSearch () {
+  //console.log(this.value); 
+  const userInputMatchArray = findUserSearch(this.value, citiesArray);
+  //console.log(userInputMatchArray);
+  //displaying the match to the UI
+  const htmlString = userInputMatchArray.map(place => {
+    // to highlight the searched words in the result
+    const highlightregex = new RegExp(this.value,'gi');
+    // highlighting the city and state names 
+    const cityName = place.city.replace(highlightregex, `<span class="hl">${this.value}</span>`); 
+    const stateName = place.state.replace(highlightregex, `<span class="hl">${this.value}</span>`); 
+    return `<li>
+          <span class="name"> ${cityName}, ${stateName}</span> 
+          <span class="population"> ${numberWithCommas(place.population)}</span> 
+          </li>` ;
+  }).join(''); // converting array to string 
+  suggestions.innerHTML = htmlString; // rendering the htmlString to UI
+}
+
+const userInput = document.querySelector('.search');
+const suggestions = document.querySelector('.suggestions');
+
+userInput.addEventListener('change',displayUserSearch);
+userInput.addEventListener('keyup',displayUserSearch);
+
+</script>
+
+
+
+
+</body>
+</html>
