@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Canvas</title>
+</head>
+<body>
+<canvas id="draw" width="800" height="800"></canvas>
+
+<script>
+
+	const canvas = document.querySelector('#draw');
+	// we don't draw on the HTML Canvas, we draw on the context which can be 2d or 3d
+	const ctx = canvas.getContext('2d');
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	ctx.strokeStyle = '#BADA55';
+	ctx.lineJoin = 'round'; // determines the shape used to join two line segments where they meet.
+	ctx.lineCap = 'round' // determines the shape used to draw the end points of lines.
+	//ctx.lineWidth = 100;
+
+	let isDrawing = false; //used to determine whether the user draws on teh canvas based on the mouse events 
+	let lastX = 0;
+	let lastY = 0; // last x and y coordinates 
+	let hue = 0; //setting hue to 0
+	let direction = true;
+
+	function draw (e) {
+
+		//console.log(e);
+		if (!isDrawing) return; // stops the function when the user mouse is not down
+        
+        ctx.strokeStyle = `hsl(${hue},100%,50%)`;
+		ctx.beginPath();
+        // start from
+        ctx.moveTo(lastX, lastY);
+        // go to
+        ctx.lineTo(e.offsetX, e.offsetY); // offest value is taken from the event where the user stops it different coordinates
+        
+        ctx.stroke();
+
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+
+        hue++;
+        if (hue >= 360) {
+        	hue = 0;
+        }
+
+
+        //based on the linewidth we are changing the direction
+        if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
+        	direction = !direction;  
+        }
+        //based on the dirction we are increasing or decreasing the linewidth
+        if(direction) {
+        	ctx.lineWidth++;
+        } else {
+        	ctx.lineWidth--;
+        }
+	}
+    
+    canvas.addEventListener('mousedown', (e) => {
+    	isDrawing = true;
+    	[lastX, lastY] = [e.offsetX, e.offsetY];  // enables the users to start from wherever they would like to draw
+    });
+
+
+	canvas.addEventListener('mousemove', draw);
+	canvas.addEventListener('mouseup', () => isDrawing = false);
+	canvas.addEventListener('mouseup', () => isDrawing = false);
+    
+
+
+</script>
+
+<style>
+  html, body {
+    margin: 0;
+  }
+</style>
+
+</body>
+</html>
